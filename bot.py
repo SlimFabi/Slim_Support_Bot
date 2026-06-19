@@ -68,10 +68,13 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(response.output_text)
 
     except Exception as e:
-        await update.message.reply_text(
-            "Slim Support ist gerade kurz überfordert. Krass digger. Bitte später nochmal."
-        )
-        print(e)
+    error_text = str(e)
+
+    await update.message.reply_text(
+        f"Slim Support ist gerade kurz überfordert.\n\nFehler intern:\n{error_text[:1000]}"
+    )
+
+    print("OPENAI_FEHLER:", error_text, flush=True)
 
 threading.Thread(target=run_webserver).start()
 
