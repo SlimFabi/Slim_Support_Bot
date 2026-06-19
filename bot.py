@@ -1,9 +1,21 @@
 import os
+import threading
+from flask import Flask
 from openai import OpenAI
 from telegram import Update
 from telegram.ext import ApplicationBuilder, MessageHandler, ContextTypes, filters
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+web_app = Flask(__name__)
+
+@web_app.route("/")
+def home():
+    return "Slim Support läuft. Krass digger."
+
+def run_webserver():
+    port = int(os.environ.get("PORT", 10000))
+    web_app.run(host="0.0.0.0", port=port)
 
 SYSTEM_PROMPT = """
 Du bist Slim Support.
@@ -61,8 +73,9 @@ async def reply(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         print(e)
 
-app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
+threading.Thread(target=run_webserver).start()
 
+app = ApplicationBuilder().token(os.getenv("TELEGRAM_TOKEN")).build()
 app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, reply))
 
 print("Slim Support ist online.")
